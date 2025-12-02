@@ -81,7 +81,7 @@ class Trainer():
                         self.logger.info(f"Early stopping triggered at epoch {epoch+1}")
                         break
             self.logger.info(f"Epoch {epoch+1}/{num_epochs} train_loss: {epoch_loss/len(self.train_dataloader):.4f} val_loss: {val_loss:.4f}")
-            plot_loss(self.train_losses, self.val_losses)
+            plot_loss(self.train_losses, self.val_losses, save_path=f"{self.checkpoint_path}/loss.png")
             if self.scheduler is not None:
                 self.scheduler.step()
             if (epoch + 1) % 10 == 0:
