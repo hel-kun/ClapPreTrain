@@ -1,4 +1,4 @@
-from datasets.datasets import Synth1Dataset
+from dataset.dataset import Synth1Dataset
 from model.model import ClapPreTrainModel
 from model.loss import MSELoss, CosineSimilarityLoss
 from model.trainer import Trainer
