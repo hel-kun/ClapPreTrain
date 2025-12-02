@@ -8,6 +8,7 @@ import tqdm
 import os
 from utils.plot import plot_loss
 from config import DEVICE
+from model.loss import MSELoss, CosineSimilarityLoss
 
 class Trainer():
     def __init__(
@@ -104,7 +105,30 @@ class Trainer():
         return total_loss/len(self.val_dataloader)
 
     def evaluate(self) -> None:
-        pass
+        self.model.eval()
+        mse_total_loss = 0.0
+        cosine_similarity_total_loss = 0.0
+        # MSEとCosineSimilarityLossで評価
+        mse_loss = MSELoss()
+        cosine_similarity_loss = CosineSimilarityLoss()
+        with torch.no_grad():
+            test_bar = tqdm.tqdm(total=len(self.test_dataloader), desc=f"Evaluating", postfix="loss: N/A")
+            for batch_idx, batch in enumerate(self.test_dataloader):
+                audio_inputs = batch['audio']
+                text_inputs = batch['texts']
+                text_embed, audio_embed = self.model(text_inputs, audio_inputs)
+                mse_loss = mse_loss(text_embed, audio_embed)
+                cosine_similarity_loss = cosine_similarity_loss(text_embed, audio_embed)
+                mse_total_loss += mse_loss.item()
+                cosine_similarity_total_loss += cosine_similarity_loss.item()
+                test_bar.set_postfix_str(f"loss: {mse_total_loss.item():.4f} {cosine_similarity_total_loss.item():.4f}")
+                test_bar.update(1)
+            test_bar.close()
+        self.logger.info(f"MSE Loss: {mse_total_loss/len(self.test_dataloader):.4f} Cosine Similarity Loss: {cosine_similarity_total_loss/len(self.test_dataloader):.4f}")
+        # textfileに保存
+        with open(f"{self.checkpoint_path}/evaluation.txt", "w") as f:
+            f.write(f"MSE Loss: {mse_total_loss/len(self.test_dataloader):.4f}\n")
+            f.write(f"Cosine Similarity Loss: {cosine_similarity_total_loss/len(self.test_dataloader):.4f}\n")
 
     def _save_checkpoint(self, epoch: int, is_best: bool = False) -> None:
         path: str = f"{self.checkpoint_path}/checkpoint_epoch_{epoch+1}.pth" if not is_best else f"{self.checkpoint_path}/best_model.pth"
