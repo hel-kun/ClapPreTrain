@@ -30,7 +30,8 @@ def main(args):
         loss_fn=loss_fn,
         device=DEVICE,
         checkpoint_path=f'checkpoints/{date}',
-        early_stopping_patience=args.es_patience
+        early_stopping_patience=args.es_patience,
+        logger=logger
     )
     trainer.train(num_epochs=args.num_epochs, resume_from_checkpoint=args.resume_from_checkpoint)
     if args.upload_to_hf:
