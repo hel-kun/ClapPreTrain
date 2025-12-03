@@ -34,6 +34,7 @@ def main(args):
         logger=logger
     )
     trainer.train(num_epochs=args.num_epochs, resume_from_checkpoint=args.resume_from_checkpoint)
+    trainer.evaluate()
     if args.upload_to_hf:
         upload_model_to_hf(trainer.model, f'checkpoints/{date}')
 
